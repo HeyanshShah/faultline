@@ -1,0 +1,21 @@
+{
+  "name": "faultline",
+  "version": "0.1.0",
+  "description": "Deterministic simulation testing for distributed systems: fuzz a Raft cluster with faults, catch safety and linearizability bugs, shrink them to a minimal replayable repro.",
+  "type": "module",
+  "license": "MIT",
+  "bin": { "faultline": "dist/cli.js" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "hunt": "node dist/cli.js hunt",
+    "soak": "node dist/cli.js soak"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2",
+    "typescript": "5.6.3",
+    "vitest": "2.1.8",
+    "@types/node": "22.10.2"
+  }
+}

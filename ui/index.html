@@ -1,0 +1,122 @@
+<title>Faultline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>/*STYLE*/</style>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 22 L11 14 L15 18 L21 8 L29 16" /><circle cx="21" cy="8" r="2.6" /></svg>
+      <div>
+        <h1>Faultline</h1>
+        <p class="tag">Deterministic simulation testing for a Raft cluster. Thousands of crashes, partitions and reorderings per second, every client operation checked for linearizability, every failure shrunk to a replayable repro.</p>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Simulator</dt><dd id="fact-speed">~750k events/s</dd></div>
+      <div><dt>Correct Raft soak</dt><dd>30,000 seeds clean</dd></div>
+      <div><dt>Ops checked</dt><dd>3.5M linearizable</dd></div>
+    </dl>
+  </header>
+
+  <aside class="rail">
+    <section class="panel">
+      <h2>Implementation under test</h2>
+      <div id="impl-list" class="impls" role="radiogroup" aria-label="Implementation under test"></div>
+    </section>
+    <section class="panel">
+      <h2>Hunt</h2>
+      <p class="hint" id="hunt-hint">Fuzz fresh seeds against the selected implementation, then shrink the first failure.</p>
+      <button id="hunt" class="primary" type="button">Hunt for bugs</button>
+      <div id="hunt-status" class="hunt-status">
+        <div class="meter"><span id="hunt-bar"></span></div>
+        <dl class="kv">
+          <div><dt>Seeds</dt><dd id="hs-seeds">–</dd></div>
+          <div><dt>Events</dt><dd id="hs-events">–</dd></div>
+          <div><dt>Rate</dt><dd id="hs-rate">–</dd></div>
+          <div><dt>Phase</dt><dd id="hs-phase">Idle</dd></div>
+        </dl>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Repro</h2>
+      <p class="hint">The whole scenario as one string. Anyone can replay the exact execution with <code>faultline replay</code> or paste it here.</p>
+      <textarea id="repro" rows="4" spellcheck="false" aria-label="Repro string"></textarea>
+      <div class="row">
+        <button id="copy" type="button">Copy</button>
+        <button id="load" type="button">Replay pasted repro</button>
+      </div>
+      <p id="repro-msg" class="hint" role="status"></p>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <section id="verdict" class="verdict">
+      <div class="verdict-head">
+        <span id="v-pill" class="pill">Violation</span>
+        <span id="v-meta" class="meta"></span>
+      </div>
+      <p id="v-text" class="v-text"></p>
+      <div id="v-shrink" class="shrinkline"></div>
+    </section>
+
+    <section class="board">
+      <div class="cluster-wrap">
+        <svg id="cluster" viewBox="0 0 640 440" role="img" aria-label="Cluster state"></svg>
+        <ul class="legend">
+          <li><i class="sw leader"></i>Leader</li>
+          <li><i class="sw candidate"></i>Candidate</li>
+          <li><i class="sw follower"></i>Follower</li>
+          <li><i class="sw down"></i>Down</li>
+          <li><i class="dot vote"></i>Vote</li>
+          <li><i class="dot append"></i>Replication</li>
+          <li><i class="dot client"></i>Client</li>
+          <li><i class="dot lost"></i>Lost</li>
+          <li><i class="cut"></i>Partitioned link</li>
+        </ul>
+      </div>
+      <div class="logs-wrap">
+        <h3>Replicated logs <span class="sub">cell colour = term, solid = committed</span></h3>
+        <div id="logs" class="logs"></div>
+        <div id="now" class="now"></div>
+      </div>
+    </section>
+
+    <section class="transport">
+      <div class="controls">
+        <button id="b-start" type="button" title="Back to start">⏮</button>
+        <button id="b-prev" type="button" title="Previous event (←)">◀</button>
+        <button id="b-play" class="primary" type="button" title="Play (space)">Play</button>
+        <button id="b-next" type="button" title="Next event (→)">▶</button>
+        <button id="b-end" type="button" title="Jump to violation">⏭</button>
+        <div class="seg" role="radiogroup" aria-label="Which events to step through">
+          <button data-filter="key" type="button">Key moments</button>
+          <button data-filter="causal" type="button">Causal</button>
+          <button data-filter="all" type="button">Everything</button>
+        </div>
+        <label class="speed">Speed
+          <select id="speed">
+            <option value="20">0.02×</option>
+            <option value="60" selected>0.06×</option>
+            <option value="200">0.2×</option>
+            <option value="600">0.6×</option>
+          </select>
+        </label>
+        <span id="clock" class="clock"></span>
+      </div>
+      <svg id="timeline" class="timeline" preserveAspectRatio="none" role="slider" aria-label="Timeline" tabindex="0"></svg>
+    </section>
+
+    <section class="lower">
+      <div class="events-wrap">
+        <h3>Events <span id="ev-count" class="sub"></span></h3>
+        <div id="events" class="events"></div>
+      </div>
+      <div id="history-wrap" class="history-wrap">
+        <h3>Client history <span id="hist-sub" class="sub"></span></h3>
+        <svg id="history" class="history"></svg>
+      </div>
+    </section>
+  </main>
+</div>
+<script>/*SCRIPT*/</script>
